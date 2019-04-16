@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+  <style>
+  #dateStart,
+  #dateEnd,
+  #applyDates {
+    position: absolute;
+    top: 10px;
+    left: 300px;
+    font-size: 40px;
+  }
+
+  #dateEnd {
+    left: 700px;
+  }
+
+  #applyDates {
+    left: 1200px;
+  }
+  </style>
+</head>
+
+<body>
+  <canvas id="myChart"></canvas>
+
+  <input type="date" id="dateStart">
+  <input type="date" id="dateEnd">
+  <button id="applyDates">Apply date selected</button>
+
+  <select name="" id="companies" style="position: absolute; top: 10px; font-size: 40px;">
+    <option value="amzn">Amazon</option>
+    <option value="micr">Microsoft</option>
+  </select>
+  <script>
+    var ticket = `amzn`
+
+    document.getElementById("companies").onchange = function (e) {
+      ticket = e.target.value
+
+      draw()
+    }
+
+    draw()
+
+
+    document.querySelector("#applyDates").onclick = function (){
+      console.log(document.querySelector("#dateStart").value)
+      console.log(document.querySelector("#dateEnd").value)
+    }
+
+
+    var companiesColors = {
+      amzn: "#ffcc0099",
+      micr: "#0044ff99"
+    }
+
+    function draw() {
+      axios.get(`https://api.iextrading.com/1.0/stock/${ticket}/chart`)
+        .then(stockData => {
+          stockData = stockData.data
+          const stockLabels = stockData.map(element => element.date);
+          const stockPrice = stockData.map(element => element.close);
+
+          const ctx = document.getElementById('myChart').getContext('2d');
+          const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: stockLabels,
+              datasets: [{
+                label: "Stock Chart",
+                borderWidth: Math.random() * 10,
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: companiesColors[ticket],
+                data: stockPrice,
+              }]
+            }
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+
+  </script>
+</body>
+
+</html>
